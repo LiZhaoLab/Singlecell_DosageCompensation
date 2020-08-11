@@ -29,6 +29,7 @@ library(ggsignif)
 library(tidyverse)
 library(rstatix)
 library(cowplot)
+library(magick)
 
 #This is for times we want to represent p values as asterisks
 symnum.args <- list(
@@ -351,6 +352,7 @@ stat.test1 <- data2 %>%
   add_significance("p.adj") %>%
   add_y_position()
 
+#data3<-data2 %>% group_by(Chr, Celltype) %>% summarise(median=median(Counts))
 
 p1<-ggplot(data1, aes(x=Celltype, y=log2(Counts+1)))+geom_boxplot(aes(fill=Chr, color=Chr), outlier.shape=NA) +  stat_summary(geom = "crossbar",aes(fill=Chr, color=Chr), width=0.6, position= position_dodge(width = 0.75), fatten=0, color="black", fun.data = function(x){ return(c(y=median(x), ymin=median(x), ymax=median(x))) })+guides(color=FALSE)+theme_classic()+
   theme(text=element_text(size=10), axis.text=element_text(size=10))+xlab("Cell type")+labs(fill="Chromosome")+ylab("Log2-normalized counts per gene")+stat_pvalue_manual(stat.test1, x="Celltype", label="p.adj.signif")+coord_flip()
@@ -435,8 +437,8 @@ get_wraper <- function(width) {
     }
 }
 
-ggplot(data3, aes(x=Celltype, y=log2(Counts+1),fill=proximity))+geom_boxplot(outlier.size=.2)+stat_compare_means(method="wilcox.test", aes(label=symnum(..p.adj.., cutpoints = c(0,.00005,  .0005,.005,.05,  1), symbols = c("****","***","**","*","ns") )))+theme_classic()+scale_fill_discrete(name="Distance to closet \nChromatin Entry Site (CES)")+theme(axis.text.x=element_text(size=10))+ 
-    scale_x_discrete(labels = get_wraper(12))
+ggplot(data3, aes(x=Celltype, y=log2(Counts+1),fill=proximity))+geom_boxplot(outlier.size=.2)+stat_compare_means(method="wilcox.test", aes(label=symnum(..p.adj.., cutpoints = c(0,.00005,  .0005,.005,.05,  1), symbols = c("****","***","**","*","ns") )))+theme_classic()+scale_fill_discrete(name="Distance to closest Chromatin \nEntry Site (CES)")+theme(axis.text.x=element_text(size=10))+ 
+    scale_x_discrete(labels = get_wraper(12))+theme(legend.position="top")
 
 #add asterisks
 
@@ -480,7 +482,71 @@ levels(testis.integrated)<-rev(c("Hub cells", "Cyst cells", "Epithelial cells", 
 p2<-DotPlot(testis.integrated, assay = "RNA", features = rev(c("msl-1", "msl-2", "msl-3", "mle", "mof", "Clamp", "roX1", "roX2")), cols=c("lightblue2",  "red2"), col.min = 0)
 p2<-p2+theme(text=element_text(size=10), axis.text.x=element_text(size=10, face = "italic"), axis.text.y=element_text(size=10, face="plain"))+xlab("Genes")+ylab("Cell type")
 p2
-ggsave("~/Box Sync/Evan/Zhao lab notebook/Writing/DC paper revisions/200629_Figure5.pdf", width=8, height=4)
+#ggsave("~/Box Sync/Evan/Zhao lab notebook/Writing/DC paper revisions/200629_Figure5.pdf", width=8, height=4)
+
+p1<-RidgePlot(testis.integrated, features = "msl-1", slot="counts")+theme(legend.position="none")
+p2<-RidgePlot(testis.integrated, features = "msl-2", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
+p3<-RidgePlot(testis.integrated, features = "msl-3", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())+xlim(0,15)
+p4<-RidgePlot(testis.integrated, features = "mle", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
+p5<-RidgePlot(testis.integrated, features = "mof", slot="counts")+theme(legend.position="none")
+p6<-RidgePlot(testis.integrated, features = "Clamp", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())+xlim(0,15)
+p7<-RidgePlot(testis.integrated, features = "roX1", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
+p8<-RidgePlot(testis.integrated, features = "roX2", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
+
+
+
+p1<-VlnPlot(testis.integrated, features = "msl-1", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+p2<-VlnPlot(testis.integrated, features = "msl-2", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+p3<-VlnPlot(testis.integrated, features = "msl-3", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+p4<-VlnPlot(testis.integrated, features = "mle", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+p5<-VlnPlot(testis.integrated, features = "mof", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+p6<-VlnPlot(testis.integrated, features = "Clamp", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+p7<-VlnPlot(testis.integrated, features = "roX1", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+p8<-VlnPlot(testis.integrated, features = "roX2", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
+
+VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
+
+VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
+p9<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl1.png")+p1
+p10<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl2.png")+p2
+p11<- ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl3.png")+p3
+p12<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/mle.png")+p4
+p13<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX1.png")+p7
+p14<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX2.png")+p8
+
+#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl1.pdf", width=8, height=6)
+p9
+#dev.off()
+#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl2.pdf", width=8, height=6)
+p10
+#dev.off()
+#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl3.pdf", width=8, height=6)
+p11
+#dev.off()
+#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/mle.pdf", width=8, height=6)
+p12
+#dev.off()
+#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX1.pdf", width=8, height=6)
+p13
+#dev.off()
+#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX2.pdf", width=8, height=6)
+p14
+#dev.off()
+
+
+#flyatlas expression#supplemental figure 14
+
+flyatlas<-read.csv("~/Box Sync/Evan/Zhao lab notebook/Misc data/DCC-gene-fpkm.csv")
+flyatlas<-flyatlas %>%pivot_longer(c(Testis.enrichment, Accessory.gland.enrichment, Male.brain.enrichment), names_to="Tissue", values_to="Enrichment")
+flyatlas$Tissue<-gsub(flyatlas$Tissue, pattern="Accessory.gland.enrichment", replacement="Accessory gland")
+flyatlas$Tissue<-gsub(flyatlas$Tissue, pattern="Testis.enrichment", replacement="Testis")
+flyatlas$Tissue<-gsub(flyatlas$Tissue, pattern="Male.brain.enrichment", replacement="Male brain")
+
+flyatlas$Tissue<-factor(flyatlas$Tissue, levels=c("Testis", "Accessory gland", "Male brain"))
+flyatlas$X<-factor(flyatlas$X, levels=c("roX1", "roX2", "msl-1", "msl-2", "msl-3", "mle", "mof", "Clamp"))
+ggplot(flyatlas, aes(x=X, y=Enrichment, fill=Tissue))+geom_bar(position="dodge", stat="identity")+theme_classic()+xlab("Gene")+ylab("Enrichment in Flyatlas2 data")+theme(axis.text.x = element_text(size=10, face="italic"),legend.text=element_text(size=10), axis.text.y=element_text(size=10))
+
+
 
 ```
 
