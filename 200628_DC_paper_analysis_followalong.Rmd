@@ -476,7 +476,7 @@ supp1$ratio<-supp1$Xpercell/supp1$Autopercell
 ```
 
 
-```{r}
+```{r Figure 6}
 #ok let's add another figure with a dotplot of msl genes.  I'll add some FISH pictures using illustrator.
 levels(testis.integrated)<-rev(c("Hub cells", "Cyst cells", "Epithelial cells", "GSC, Early spermatogonia", "Late spermatogonia", "Early spermatocytes", "Late spermatocytes", "Early spermatids", "Late spermatids"))
 p2<-DotPlot(testis.integrated, assay = "RNA", features = rev(c("msl-1", "msl-2", "msl-3", "mle", "mof", "Clamp", "roX1", "roX2")), cols=c("lightblue2",  "red2"), col.min = 0)
@@ -504,9 +504,9 @@ p6<-VlnPlot(testis.integrated, features = "Clamp", slot="counts")+theme(legend.p
 p7<-VlnPlot(testis.integrated, features = "roX1", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
 p8<-VlnPlot(testis.integrated, features = "roX2", slot="counts")+theme(legend.position="none")+ylab("Counts")+xlab("Cell type")
 
-VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
+#VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
 
-VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
+#VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
 p9<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl1.png")+p1
 p10<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl2.png")+p2
 p11<- ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl3.png")+p3
@@ -514,29 +514,31 @@ p12<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images
 p13<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX1.png")+p7
 p14<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX2.png")+p8
 
+plot_grid(p7,p8,p1,p2,p3,p4, nrow=2)
+
 #pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl1.pdf", width=8, height=6)
-p9
+#p9
 #dev.off()
 #pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl2.pdf", width=8, height=6)
-p10
+#p10
 #dev.off()
 #pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl3.pdf", width=8, height=6)
-p11
+#p11
 #dev.off()
 #pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/mle.pdf", width=8, height=6)
-p12
+#p12
 #dev.off()
 #pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX1.pdf", width=8, height=6)
-p13
+#p13
 #dev.off()
 #pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX2.pdf", width=8, height=6)
-p14
+#p14
 #dev.off()
 
 
 #flyatlas expression#supplemental figure 14
 
-flyatlas<-read.csv("~/Box Sync/Evan/Zhao lab notebook/Misc data/DCC-gene-fpkm.csv")
+flyatlas<-read.csv("~/Downloads/WittZhao2020data/DCC-gene-fpkm.csv")
 flyatlas<-flyatlas %>%pivot_longer(c(Testis.enrichment, Accessory.gland.enrichment, Male.brain.enrichment), names_to="Tissue", values_to="Enrichment")
 flyatlas$Tissue<-gsub(flyatlas$Tissue, pattern="Accessory.gland.enrichment", replacement="Accessory gland")
 flyatlas$Tissue<-gsub(flyatlas$Tissue, pattern="Testis.enrichment", replacement="Testis")
