@@ -18,7 +18,6 @@ First, let's set everything up.  If you downloaded the data files somewhere else
 ```{r fig.width=12, message=FALSE, warning=FALSE}
 setwd("~/Downloads/WittZhao2020data")
 library(Seurat)
-library(viridis)
 library(MASS)
 library(plyr)
 library(dplyr)
@@ -62,7 +61,7 @@ autosomal <-autosomal[!autosomal %in% X]
 autosomal <-autosomal[!autosomal %in% Y]
 
 testisspecificgenes<-join(testisspecificgenes,genestsv, by="ID", type="inner" )
-testisspecificgenes<-droplevels(testisspecificgenes$Gene)
+testisspecificgenes<-testisspecificgenes$Gene
 testisspecificgenes<-testisspecificgenes[testisspecificgenes %in% rownames(GetAssayData(object = testis.integrated))]
 
 ```
@@ -131,19 +130,20 @@ p2<-ggplot(data1, aes(x=data1$Celltype, y=Autocounts))+geom_boxplot(outlier.shap
 stat_summary(geom = "crossbar", width=0.6, position= position_dodge(width = 0.75), fatten=0, color="black", fun.data = function(x){ return(c(y=median(x), ymin=median(x), ymax=median(x))) })+  scale_y_log10(limits=c(100, 100000))+xlab("Cell type")+ ylab("Autosomal UMIs (RNA content) per cell")+coord_flip()+
   theme(axis.text.x=element_text(angle=90, size=10), axis.title=element_text(size=10) ,axis.text.y=element_text(size=10))
   
-p1<-plot_grid(p1, p2, ncol=1, rel_widths=c(1,1))
-#Figure 1A- make t-sNE showing dimensional reduction of cell types
-p2 <- DimPlot(testis.integrated, reduction = "tsne", label = FALSE , cols = pal)
-p2<-p2+theme(text=element_text(size=10), axis.text=element_text(size=10), axis.title=element_text(size=10), legend.text=element_text(size=10))
-p1<-p1+theme(text=element_text(size=10), axis.text=element_text(size=10), axis.title=element_text(size=10), legend.text=element_text(size=10))
+p1<-plot_grid(p1, p2, ncol=2, rel_widths=c(1,1), labels=c("C", "D"), label_size = 10)
+#Figure 1B- make t-sNE showing dimensional reduction of cell types
+fig1b<-DimPlot(testis.integrated, reduction = "tsne", label = FALSE , cols = pal)
+p2 <- plot_grid(NULL, fig1b, labels=c("A", "B"), rel_widths=c(0.8,1),label_size=10)
+p2<-p2+theme(text=element_text(size=10), axis.title=element_text(size=10), legend.text=element_text(size=10))
+p1<-p1+theme(text=element_text(size=10), axis.title=element_text(size=10), legend.text=element_text(size=10))
 
-p1 <-plot_grid(p2, p1, rel_widths = c(1.2,1) ,labels = c("A", "B"), label_size = 10)
+p1 <-plot_grid(p2, p1, ncol=1,rel_widths = c(1.2,1))
 
  
 #plot_grid(p1, p2, ncol=1, labels = c("A", "C"), label_size = 10, rel_heights = c(0.8,1.5))
 p1
-ggsave( "~/Box Sync/Evan/Zhao lab notebook/Writing/DC paper revisions/200325_figure1.pdf", width=12, height=5)
-
+#ggsave( "~/Box Sync/Evan/Zhao lab notebook/Writing/DC paper revisions/200325_figure1.pdf", width=10, height=8)
+#note: I added some stuff in illustrator
 ```
 Time for figure 2:
 ```{r, fig.width=10, fig.height=10, fig.height=6.5}
@@ -473,6 +473,24 @@ supp1
 supp1$ratio<-supp1$Xpercell/supp1$Autopercell
 
 
+flyCDS$Genename<-flyCDS$SYMBOL
+#position vs counts: save for rainy day
+posvscounts<-join(subset(flyCDS, SYMBOL %in%X),data2 )
+ncell<-data.frame(table(testis.integrated@active.ident))
+colnames(ncell)<-c("Celltype", "ncell")
+posvscounts<-join(posvscounts, ncell)
+posvscounts$countspercell<-posvscounts$Counts/posvscounts$ncell
+posvscounts$logcountspercell<-log2(posvscounts$countspercell+1)
+
+posplot<-ggplot(posvscounts, aes(x=start, y=countspercell))+stat_summary_bin(fun.y="sum", geom="line", bins=2354)+facet_wrap(~Celltype, scales="free", nrow = 9)+theme_classic()+xlab("Gene start position (bp)")+ylab("Counts per cell")
+
+posplot<-ggplot(posvscounts, aes(x=start, y=countspercell))+stat_summary_bin(fun.y="sum", geom="line", bins=235.4)+facet_wrap(~Celltype, scales="free", nrow = 9)+theme_classic()+xlab("Gene start position (bp)")+ylab("Counts per cell")
+
+posplot<-ggplot(posvscounts, aes(x=start, y=countspercell))+stat_summary_bin(fun.y="mean", geom="line", bins=50)+facet_wrap(~Celltype, scales="free", nrow = 9)+theme_classic()+xlab("Gene start position (bp)")+ylab("Counts per cell")
+
+
+
+#need to correlate faceted independent and dependent variables
 ```
 
 
@@ -483,15 +501,6 @@ p2<-DotPlot(testis.integrated, assay = "RNA", features = rev(c("msl-1", "msl-2",
 p2<-p2+theme(text=element_text(size=10), axis.text.x=element_text(size=10, face = "italic"), axis.text.y=element_text(size=10, face="plain"))+xlab("Genes")+ylab("Cell type")
 p2
 #ggsave("~/Box Sync/Evan/Zhao lab notebook/Writing/DC paper revisions/200629_Figure5.pdf", width=8, height=4)
-
-p1<-RidgePlot(testis.integrated, features = "msl-1", slot="counts")+theme(legend.position="none")
-p2<-RidgePlot(testis.integrated, features = "msl-2", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
-p3<-RidgePlot(testis.integrated, features = "msl-3", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())+xlim(0,15)
-p4<-RidgePlot(testis.integrated, features = "mle", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
-p5<-RidgePlot(testis.integrated, features = "mof", slot="counts")+theme(legend.position="none")
-p6<-RidgePlot(testis.integrated, features = "Clamp", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())+xlim(0,15)
-p7<-RidgePlot(testis.integrated, features = "roX1", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
-p8<-RidgePlot(testis.integrated, features = "roX2", slot="counts")+theme(legend.position="none", axis.text.y=element_blank())
 
 
 
@@ -507,33 +516,10 @@ p8<-VlnPlot(testis.integrated, features = "roX2", slot="counts")+theme(legend.po
 #VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
 
 #VlnPlot(testis.integrated, features = c("msl-1","msl-2","msl-3","mle","mof","Clamp", "roX1", "roX2"), slot="counts")
-p9<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl1.png")+p1
-p10<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl2.png")+p2
-p11<- ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl3.png")+p3
-p12<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/mle.png")+p4
-p13<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX1.png")+p7
-p14<-ggdraw()+draw_image("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX2.png")+p8
+
 
 plot_grid(p7,p8,p1,p2,p3,p4, nrow=2)
 
-#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl1.pdf", width=8, height=6)
-#p9
-#dev.off()
-#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl2.pdf", width=8, height=6)
-#p10
-#dev.off()
-#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/msl3.pdf", width=8, height=6)
-#p11
-#dev.off()
-#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/mle.pdf", width=8, height=6)
-#p12
-#dev.off()
-#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX1.pdf", width=8, height=6)
-#p13
-#dev.off()
-#pdf("~/Box Sync/Evan/Zhao lab notebook/Misc_data/DCC-images/roX2.pdf", width=8, height=6)
-#p14
-#dev.off()
 
 
 #flyatlas expression#supplemental figure 14
