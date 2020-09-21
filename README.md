@@ -1,6 +1,6 @@
 # Singlecell_DosageCompensation
 
-This repository supports Witt and Zhao 2020, and contains the code neccesary to reproduce the main figures from the manuscript.  
+This repository supports Witt , Shao, Hu, Krause and Zhao 2020, and contains the code neccesary to reproduce the main figures from the manuscript.  
 
 Data files to run these analyses are here:
 https://rockefeller.box.com/s/7t5s060t7olewlpwmtjlef2ifc45u1wu
