@@ -3,7 +3,7 @@
 This repository supports Witt , Shao, Hu, Krause and Zhao 2020, and contains the code neccesary to reproduce the main figures from the manuscript.  
 
 Data files to run these analyses are here:
-https://rockefeller.box.com/s/7t5s060t7olewlpwmtjlef2ifc45u1wu
+https://www.dropbox.com/s/f4xjchwcylh34qq/WittZhao2020data.zip?dl=0
 
 
 To reproduce the figures, download the data package in the box link, and run the rmarkdown script above.  Feel free to change clustering parameters or anything else.  If you run into problems, make sure the data files are in the correct directory called by the scripts, and install all required packages.
